@@ -79,7 +79,6 @@ class GraphqlSubscriptionConsumer(SyncConsumer):
 
         elif request["type"] == "stop":
             self.OBSERVABLE_DICT[id].dispose()
-            raise StopConsumer()
 
     def signal_fired(self, message):
         stream.on_next(SubscriptionEvent.from_dict(message["event"]))
