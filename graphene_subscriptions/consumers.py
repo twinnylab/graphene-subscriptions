@@ -73,10 +73,12 @@ class GraphqlSubscriptionConsumer(SyncConsumer):
 
             if hasattr(result, "subscribe"):
                 data = result.subscribe(functools.partial(self._send_result, id))
+                self.OBSERVABLE_DICT[id] = data
             else:
                 self._send_result(id, result)
 
         elif request["type"] == "stop":
+            self.OBSERVABLE_DICT[id].dispose()
             raise StopConsumer()
 
     def signal_fired(self, message):
