@@ -35,6 +35,8 @@ class AttrDict:
 
 
 class GraphqlSubscriptionConsumer(SyncConsumer):
+    OBSERVABLE_DICT = {}
+
     def websocket_connect(self, message):
         async_to_sync(self.channel_layer.group_add)("subscriptions", self.channel_name)
 
@@ -70,12 +72,13 @@ class GraphqlSubscriptionConsumer(SyncConsumer):
             )
 
             if hasattr(result, "subscribe"):
-                result.subscribe(functools.partial(self._send_result, id))
+                data = result.subscribe(functools.partial(self._send_result, id))
+                self.OBSERVABLE_DICT[id] = data
             else:
                 self._send_result(id, result)
 
         elif request["type"] == "stop":
-            pass
+            self.OBSERVABLE_DICT[id].dispose()
 
     def signal_fired(self, message):
         stream.on_next(SubscriptionEvent.from_dict(message["event"]))
